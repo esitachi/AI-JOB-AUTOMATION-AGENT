@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>AI Job Automation Agent</title>
+    <style>
+      :root {
+        font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+        color: #0f172a;
+        background: #05060a;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: radial-gradient(circle at top, rgba(59, 130, 246, 0.35), transparent),
+          radial-gradient(circle at 20% 20%, rgba(14, 165, 233, 0.4), transparent 50%),
+          radial-gradient(circle at 80% 0%, rgba(236, 72, 153, 0.35), transparent 55%),
+          #020617;
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        padding: 3rem 1.25rem 4rem;
+      }
+
+      .app {
+        width: min(1100px, 100%);
+        background: rgba(15, 23, 42, 0.75);
+        border-radius: 24px;
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        box-shadow: 0 25px 60px rgba(2, 6, 23, 0.6);
+        backdrop-filter: blur(22px);
+        padding: 3rem;
+        color: #e2e8f0;
+      }
+
+      header {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.25rem;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+      }
+
+      header h1 {
+        font-size: clamp(2rem, 2.8vw, 3rem);
+        margin: 0;
+      }
+
+      header p {
+        max-width: 420px;
+        margin: 0;
+        color: #cbd5f5;
+        line-height: 1.6;
+      }
+
+      .badge {
+        padding: 0.35rem 1rem;
+        border-radius: 999px;
+        background: rgba(59, 130, 246, 0.15);
+        color: #bfdbfe;
+        font-weight: 600;
+        font-size: 0.9rem;
+      }
+
+      form {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 1.25rem 1.5rem;
+        margin-bottom: 1.5rem;
+      }
+
+      label {
+        display: flex;
+        flex-direction: column;
+        gap: 0.45rem;
+        font-size: 0.9rem;
+        color: #cbd5f5;
+        letter-spacing: 0.02em;
+      }
+
+      input,
+      textarea {
+        border-radius: 14px;
+        border: 1px solid rgba(148, 163, 184, 0.35);
+        background: rgba(2, 6, 23, 0.35);
+        color: #f1f5f9;
+        padding: 0.9rem 1rem;
+        font-size: 1rem;
+        transition: border 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      input:focus,
+      textarea:focus {
+        outline: none;
+        border-color: rgba(59, 130, 246, 0.8);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+      }
+
+      textarea {
+        min-height: 100px;
+        resize: vertical;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        margin: 1.5rem 0 2rem;
+      }
+
+      button {
+        border: none;
+        border-radius: 14px;
+        padding: 0.9rem 1.75rem;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.18s ease, box-shadow 0.2s ease, background 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+      }
+
+      button.primary {
+        background: linear-gradient(135deg, #6366f1, #3b82f6);
+        color: #fff;
+        box-shadow: 0 12px 25px rgba(79, 70, 229, 0.35);
+      }
+
+      button.secondary {
+        background: rgba(255, 255, 255, 0.08);
+        color: #e2e8f0;
+        border: 1px solid rgba(148, 163, 184, 0.2);
+      }
+
+      button:disabled {
+        opacity: 0.65;
+        cursor: not-allowed;
+        box-shadow: none;
+      }
+
+      button:not(:disabled):hover {
+        transform: translateY(-1px);
+      }
+
+      .status {
+        padding: 0.85rem 1.2rem;
+        border-radius: 12px;
+        background: rgba(59, 130, 246, 0.15);
+        color: #bfdbfe;
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        font-weight: 600;
+        margin-bottom: 1.25rem;
+      }
+
+      .progress {
+        display: flex;
+        gap: 0.75rem;
+        margin-bottom: 2rem;
+      }
+
+      .dot {
+        flex: 1;
+        text-align: center;
+        font-size: 0.85rem;
+        color: #94a3b8;
+        position: relative;
+      }
+
+      .dot::before {
+        content: "";
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: rgba(148, 163, 184, 0.35);
+        margin-bottom: 0.35rem;
+      }
+
+      .dot.active {
+        color: #fef3c7;
+      }
+
+      .dot.active::before {
+        background: linear-gradient(135deg, #f97316, #fbbf24);
+        box-shadow: 0 0 12px rgba(251, 191, 36, 0.6);
+      }
+
+      .panel {
+        border: 1px solid rgba(148, 163, 184, 0.25);
+        border-radius: 18px;
+        padding: 1.75rem;
+        margin-bottom: 2rem;
+        background: rgba(15, 23, 42, 0.7);
+      }
+
+      .panel h2 {
+        margin: 0 0 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .steps {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
+      }
+
+      .step-card {
+        border-radius: 16px;
+        padding: 1.2rem;
+        background: rgba(96, 165, 250, 0.08);
+        border: 1px solid rgba(147, 197, 253, 0.2);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .step-card strong {
+        display: block;
+        font-size: 1rem;
+        margin-bottom: 0.35rem;
+      }
+
+      .step-card span {
+        font-size: 0.85rem;
+        color: #cbd5f5;
+      }
+
+      .param-list {
+        margin: 0.85rem 0 0;
+        padding-left: 1rem;
+        color: #cbd5f5;
+        font-size: 0.92rem;
+      }
+
+      .log {
+        min-height: 100px;
+        white-space: pre-wrap;
+        font-size: 0.95rem;
+        padding: 1rem;
+        border-radius: 12px;
+        background: rgba(2, 6, 23, 0.5);
+        border: 1px dashed rgba(148, 163, 184, 0.4);
+        color: #e2e8f0;
+      }
+
+      .loader {
+        position: fixed;
+        inset: 0;
+        background: rgba(2, 6, 23, 0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        backdrop-filter: blur(4px);
+      }
+
+      .loader.hidden {
+        display: none;
+      }
+
+      .spinner {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        border: 4px solid rgba(148, 163, 184, 0.3);
+        border-top-color: #38bdf8;
+        animation: spin 1s linear infinite;
+      }
+
+      .toast {
+        position: fixed;
+        right: 2rem;
+        bottom: 2rem;
+        background: rgba(15, 23, 42, 0.92);
+        padding: 1rem 1.5rem;
+        border-radius: 14px;
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        box-shadow: 0 10px 30px rgba(2, 6, 23, 0.5);
+        opacity: 0;
+        transform: translateY(20px);
+        transition: opacity 0.25s ease, transform 0.25s ease;
+      }
+
+      .toast.show {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      @media (max-width: 720px) {
+        body {
+          padding: 1.5rem 1rem 3rem;
+        }
+
+        .app {
+          padding: 2rem;
+        }
+
+        .actions {
+          flex-direction: column;
+          align-items: stretch;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <header>
+        <div>
+          <div class="badge">Playwright + FastAPI</div>
+          <h1>AI Job Automation Agent</h1>
+          <p>
+            Provide a role, location and target job boards. We’ll plan the browser automation sequence and hand it off to the Playwright executor.
+          </p>
+        </div>
+        <div>
+          <div>Backend status</div>
+          <div class="status" id="statusBar">Idle – waiting for input.</div>
+        </div>
+      </header>
+
+      <form id="planForm">
+        <label>
+          Job Title
+          <input id="jobTitle" value="Senior Automation Engineer" required />
+        </label>
+        <label>
+          Location
+          <input id="location" value="Bengaluru" required />
+        </label>
+        <label style="grid-column: 1 / -1">
+          Target sites (comma separated)
+          <textarea id="sites" required>indeed.com, naukri.com</textarea>
+        </label>
+      </form>
+
+      <div class="actions">
+        <button class="primary" id="planBtn">⚡ Generate plan</button>
+        <button class="secondary" id="executeBtn">▶️ Execute plan</button>
+        <button class="secondary" id="resetBtn">↺ Reset</button>
+      </div>
+
+      <div class="progress" id="progressDots"></div>
+
+      <div class="panel">
+        <h2>📋 Plan preview</h2>
+        <div id="planEmpty">No plan generated yet.</div>
+        <div id="planSteps" class="steps"></div>
+      </div>
+
+      <div class="panel">
+        <h2>📡 Execution log</h2>
+        <div id="execLog" class="log">No execution yet.</div>
+      </div>
+    </div>
+
+    <div class="loader hidden" id="loader">
+      <div class="spinner"></div>
+    </div>
+    <div class="toast" id="toast"></div>
+
+    <script>
+      const planBtn = document.getElementById("planBtn");
+      const executeBtn = document.getElementById("executeBtn");
+      const resetBtn = document.getElementById("resetBtn");
+      const planStepsEl = document.getElementById("planSteps");
+      const planEmptyEl = document.getElementById("planEmpty");
+      const statusBar = document.getElementById("statusBar");
+      const execLog = document.getElementById("execLog");
+      const loader = document.getElementById("loader");
+      const toast = document.getElementById("toast");
+      const progressDots = document.getElementById("progressDots");
+
+      const stages = ["Collecting input", "Plan ready", "Executing"];
+      let currentStage = 0;
+      let currentPlan = null;
+
+      const renderProgress = () => {
+        progressDots.innerHTML = "";
+        stages.forEach((stage, idx) => {
+          const dot = document.createElement("div");
+          dot.className = "dot" + (idx <= currentStage ? " active" : "");
+          dot.innerHTML = `<div>${stage}</div>`;
+          progressDots.appendChild(dot);
+        });
+      };
+      renderProgress();
+
+      const showToast = (message, isSuccess = true) => {
+        toast.textContent = message;
+        toast.style.borderColor = isSuccess ? "rgba(74, 222, 128, 0.5)" : "rgba(248, 113, 113, 0.6)";
+        toast.style.color = isSuccess ? "#bbf7d0" : "#fecaca";
+        toast.classList.add("show");
+        setTimeout(() => toast.classList.remove("show"), 2800);
+      };
+
+      const toggleLoader = (show) => {
+        loader.classList.toggle("hidden", !show);
+      };
+
+      const setStatus = (text) => {
+        statusBar.textContent = text;
+      };
+
+      const setLoading = (isLoading) => {
+        planBtn.disabled = isLoading;
+        executeBtn.disabled = isLoading || !currentPlan;
+        toggleLoader(isLoading);
+      };
+
+      const renderPlan = (plan) => {
+        planStepsEl.innerHTML = "";
+        if (!plan?.steps?.length) {
+          planEmptyEl.textContent = "Planner returned no steps.";
+          return;
+        }
+        planEmptyEl.textContent = "";
+        plan.steps.forEach((step) => {
+          const card = document.createElement("div");
+          card.className = "step-card";
+          card.innerHTML = `
+            <strong>#${step.id} · ${step.action}</strong>
+            <span>${new Date().toLocaleTimeString()}</span>
+            ${
+              Object.keys(step.params || {}).length
+                ? `<ul class="param-list">${Object.entries(step.params)
+                    .map(
+                      ([key, value]) =>
+                        `<li><b>${key}</b>: ${JSON.stringify(value)}</li>`
+                    )
+                    .join("")}</ul>`
+                : "<em>No parameters</em>"
+            }
+          `;
+          planStepsEl.appendChild(card);
+        });
+      };
+
+      const getFormData = () => {
+        const jobTitle = document.getElementById("jobTitle").value.trim();
+        const location = document.getElementById("location").value.trim();
+        const sites = document
+          .getElementById("sites")
+          .value.split(",")
+          .map((s) => s.trim())
+          .filter(Boolean);
+        if (!jobTitle || !location || !sites.length) {
+          throw new Error("Fill job title, location, and at least one target site.");
+        }
+        return { job_title: jobTitle, location, target_sites: sites };
+      };
+
+      const fetchJson = async (url, options) => {
+        const response = await fetch(url, options);
+        if (!response.ok) {
+          const text = await response.text();
+          throw new Error(text || response.statusText);
+        }
+        return response.json();
+      };
+
+      planBtn.addEventListener("click", async () => {
+        try {
+          setLoading(true);
+          currentStage = 0;
+          renderProgress();
+          setStatus("Sending plan request...");
+          const payload = getFormData();
+          const plan = await fetchJson("/plan", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+          currentPlan = plan;
+          renderPlan(plan);
+          currentStage = 1;
+          renderProgress();
+          executeBtn.disabled = false;
+          setStatus("Plan ready. Review steps before executing.");
+          showToast("Plan generated successfully.", true);
+        } catch (error) {
+          console.error(error);
+          setStatus(`Plan failed: ${error.message}`);
+          showToast(`Plan failed: ${error.message}`, false);
+        } finally {
+          setLoading(false);
+        }
+      });
+
+      executeBtn.addEventListener("click", async () => {
+        if (!currentPlan) {
+          setStatus("Generate a plan before executing.");
+          showToast("Generate a plan first.", false);
+          return;
+        }
+        try {
+          setLoading(true);
+          currentStage = 2;
+          renderProgress();
+          setStatus("Executing plan in Playwright...");
+          const res = await fetchJson("/execute", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(currentPlan),
+          });
+          execLog.textContent = `Last run: ${new Date().toLocaleTimeString()}
+Status: ${res.status}
+Message: ${res.message || "Execution kicked off"}`;
+          setStatus("Execution finished. Check the Playwright window.");
+          showToast("Execution request completed.", true);
+        } catch (error) {
+          console.error(error);
+          setStatus(`Execution failed: ${error.message}`);
+          execLog.textContent = `Error: ${error.message}`;
+          showToast(`Execution failed: ${error.message}`, false);
+        } finally {
+          setLoading(false);
+        }
+      });
+
+      resetBtn.addEventListener("click", () => {
+        currentPlan = null;
+        currentStage = 0;
+        renderProgress();
+        planStepsEl.innerHTML = "";
+        planEmptyEl.textContent = "No plan generated yet.";
+        execLog.textContent = "No execution yet.";
+        setStatus("Idle – waiting for input.");
+        executeBtn.disabled = true;
+        document.getElementById("planForm").reset();
+        showToast("Form cleared.", true);
+      });
+
+      // Initial disabled state
+      executeBtn.disabled = true;
+    </script>
+  </body>
+</html>
