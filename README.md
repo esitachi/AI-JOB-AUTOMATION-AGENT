@@ -1,4 +1,4 @@
-# 🤖 AI Web Automation Agent
+# 🤖 AI JOB Automation Agent
 
 An AI-powered agent that automates job application workflows using **FastAPI, Playwright, and OpenAI**.
 
